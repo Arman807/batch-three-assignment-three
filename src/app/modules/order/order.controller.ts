@@ -37,15 +37,17 @@ const createOrder = async (req: Request, res: Response) => {
     data: result,
   });
 };
-const getOrders = catchAsync(async (req: Request, res: Response) => {
-  const email = req.query.email as string;
+const getOrders = catchAsync(async (req, res) => {
+  const params = {
+    email: req.query.email as string | undefined
+  };
 
   let result;
-  if (email) {
-    if (!email) {
+  if (params.email) {
+    result = await OrderService.getOrderByEmail(params.email);
+    if (!result.length) {
       throw new AppError(httpStatus.NOT_FOUND, "Order not found");
     }
-    result = await OrderService.getOrderByEmail(email);
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
@@ -62,6 +64,7 @@ const getOrders = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
+
 
 export const OrderController = {
   createOrder,

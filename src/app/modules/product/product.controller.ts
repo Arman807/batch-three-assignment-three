@@ -17,15 +17,27 @@ const createProduct = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const getProuduct = async (req: Request, res: Response) => {
-  const result = await ProductService.getProduct();
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Products fetched successfully!",
-    data: result,
-  });
-};
+const getProductOrSearch = catchAsync(async (req, res) => {
+  const searchTerm = req.query.searchTerm as string;
+
+  if (searchTerm) {
+    const result = await ProductService.searchProducts(searchTerm);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: `Products matching search term ${searchTerm} fetched successfully!`,
+      data: result,
+    });
+  } else {
+    const result = await ProductService.getProduct();
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Products fetched successfully!",
+      data: result,
+    });
+  }
+});
 const getProuductByid = async (req: Request, res: Response) => {
   const { _id } = req.params;
   const result = await ProductService.getProductbyId(_id);
@@ -62,17 +74,7 @@ const deleteProduct = async (req: Request, res: Response) => {
     data: null,
   });
 };
-const searchProducts = async (req: Request, res: Response) => {
-  const searchTerm = req.query.searchTerm as string;
-  const result = await ProductService.searchProducts(searchTerm);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: `Products matching search term ${searchTerm} fetched successfully!`,
-    data: result,
-  });
-};
 const updateProductQuantity = async (
   productId: string,
   quantityChange: number
@@ -96,10 +98,10 @@ const updateProductQuantity = async (
 
 export const ProductController = {
   createProduct,
-  getProuduct,
+ 
   getProuductByid,
   updateProduct,
   deleteProduct,
-  searchProducts,
+  getProductOrSearch,
   updateProductQuantity,
 };
